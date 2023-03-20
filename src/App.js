@@ -19,11 +19,12 @@ function App() {
     };
 
     const doTranscode = async () => {
+        setConvertedSrc(null);
         setMessage("Loading ffmpeg-core.js");
         await ffmpeg.load();
         const startTime = Date.now();
         setMessage("Start transcoding");
-        ffmpeg.FS("writeFile", "test.mp4", await fetchFile(getURL(videoSrc)));
+        ffmpeg.FS("writeFile", "test.avi", await fetchFile(getURL(videoSrc)));
         ffmpeg.setProgress((progress) =>
             setMessage(
                 `Transcoding: ${
@@ -34,20 +35,20 @@ function App() {
         await ffmpeg.run(
             "-noautorotate",
             "-i",
-            "test.mp4",
+            "test.avi",
             "-r",
             "25",
             "-c:v",
-            "libvpx-vp9",
-            "-b:v",
-            "2M",
-            "-preset",
-            "ultrafast",
-            "-s",
-            "hd720",
-            "-deadline",
-            "good",
-            "output.webm"
+            "libx264",
+            "-movflags",
+            "faststart",
+            "-crf",
+            "32",
+            "-vf",
+            "scale=1280:720",
+            // "-s",
+            // "hd720",
+            "output.mp4"
         );
         const endTime = Date.now();
         setMessage(
@@ -92,7 +93,7 @@ function App() {
             <h1>Converted</h1>
             <p>
                 Details: {convertedSrc ? getURL(convertedSrc) : "none"}, Size:{" "}
-                {convertedSrc.size / 1024 ** 2 || 0} mb
+                {convertedSrc ? convertedSrc.size / 1024 ** 2 : 0} mb
             </p>
             {convertedSrc && (
                 <video
