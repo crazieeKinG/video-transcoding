@@ -6,6 +6,7 @@ function App() {
     const [videoSrc, setVideoSrc] = useState("");
     const [convertedSrc, setConvertedSrc] = useState("");
     const [message, setMessage] = useState("Click Start to transcode");
+    const [mode, setMode] = useState(null);
 
     const ffmpeg = createFFmpeg({
         corePath: "./core/dist/ffmpeg-core.js",
@@ -19,6 +20,8 @@ function App() {
     };
 
     const doTranscode = async () => {
+        const scaleFactor = mode === "P" ? "720:1280" : "1280:720";
+        console.log(scaleFactor, "-", mode);
         setConvertedSrc(null);
         setMessage("Loading ffmpeg-core.js");
         await ffmpeg.load();
@@ -33,7 +36,6 @@ function App() {
             )
         );
         await ffmpeg.run(
-            "-noautorotate",
             "-i",
             "test.avi",
             "-r",
@@ -45,7 +47,7 @@ function App() {
             "-crf",
             "32",
             "-vf",
-            "scale=1280:720",
+            `scale=${scaleFactor}`,
             // "-s",
             // "hd720",
             "output.mp4"
@@ -70,6 +72,10 @@ function App() {
                     setVideoSrc(event.target.files[0]);
                 }}
             />
+            <select onChange={(e) => setMode(e.target.value)}>
+                <option value="P">Portrait</option>
+                <option value="L">Landscape</option>
+            </select>
             <h1>Original</h1>
             <p>
                 Details:
